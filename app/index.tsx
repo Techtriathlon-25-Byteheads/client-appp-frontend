@@ -1,289 +1,294 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  SafeAreaView,
-  TouchableOpacity,
-  StatusBar,
-  Image,
-} from 'react-native';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, Image } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { Feather, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 
+// A placeholder for the doctor illustration
+const doctorIllustration = require('../assets/images/doctor-illustration.png');
 
-const DOCTOR_IMAGE_URL = 'https://i.imgur.com/7p4Ff2v.png';
-
-const HealthAppScreen = () => {
+export default function App() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContentContainer}>
-        
-        {/* Header */}
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" backgroundColor="#4A934A" />
+
+      {/* --- Fixed Green Background --- */}
+      <View style={styles.greenBackground}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>Ayubowan, Yasiru!</Text>
-            <Text style={styles.headerSubtitle}>ආයුබෝවන්, යසිරු!</Text>
-            <Text style={styles.headerSubtitle}>வணக்கம், யசிரு!</Text>
+            <Text style={styles.greeting}>Ayubowan, Yasiru!</Text>
+            <Text style={styles.greetingSub}>ආයුබෝවන්, යසිරු!</Text>
+            <Text style={styles.greetingSub}>வணக்கம், யசிரு!</Text>
             <Text style={styles.welcomeText}>Welcome to National Health Hub of Sri Lanka.</Text>
           </View>
-          <Ionicons name="person-circle" size={48} color="white" />
+          <TouchableOpacity style={styles.profileIconContainer}>
+            <Feather name="user" size={28} color="#4A934A" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView
+        style={styles.whiteSheet}
+        contentContainerStyle={styles.whiteSheetContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.mainTitle}>What Medi-Help do you need Today?</Text>
+
+        {/* --- Action Cards --- */}
+        <View style={styles.cardRow}>
+          <TouchableOpacity style={styles.card}>
+            <FontAwesome name="calendar-plus-o" size={24} color="#4A934A" />
+            <Text style={styles.cardTitle}>Book an Apppointment</Text>
+            <Text style={styles.cardSubtitle}>Book a Doctor or scan</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card}>
+            <FontAwesome name="file-text-o" size={24} color="#4A934A" />
+            <Text style={styles.cardTitle}>My Reports</Text>
+            <Text style={styles.cardSubtitle}>Your Previous Medical Documents</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Main Content Card */}
-        <View style={styles.mainCard}>
-          <Text style={styles.mainCardTitle}>What Medi-Help do you need Today?</Text>
-          <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity style={styles.actionButton}>
-              <MaterialCommunityIcons name="book-plus-outline" size={32} color="#2D8C6E" />
-              <View style={styles.actionButtonTextContainer}>
-                <Text style={styles.actionButtonTitle}>Book an Apppointment</Text>
-                <Text style={styles.actionButtonSubtitle}>Book a Doctor or scan</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="document-text-outline" size={32} color="#2D8C6E" />
-              <View style={styles.actionButtonTextContainer}>
-                <Text style={styles.actionButtonTitle}>My Reports</Text>
-                <Text style={styles.actionButtonSubtitle}>Your Previous Medical Documents</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* General Appointment Card */}
+        {/* --- General Appointment Card --- */}
         <View style={styles.appointmentCard}>
           <View style={styles.appointmentHeader}>
-            <View>
-              <Text style={styles.appointmentTitle}>General Appointment</Text>
-              <Text style={styles.appointmentSubtitle}>OPD @ Colombo National Hospital</Text>
+            <View style={styles.appointmentInfo}>
+              <View style={styles.calendarIconBg}>
+                <FontAwesome name="calendar" size={18} color="#5D9C9C" />
+              </View>
+              <View>
+                <Text style={styles.appointmentTitle}>General Appointment</Text>
+                <Text style={styles.appointmentSubtitle}>OPD @ Colombo National Hospital</Text>
+              </View>
             </View>
-            <Feather name="phone" size={24} color="white" />
+            <TouchableOpacity>
+              <MaterialCommunityIcons name="arrow-top-right" size={24} color="white" />
+            </TouchableOpacity>
           </View>
           <View style={styles.appointmentDetails}>
-            <View style={styles.appointmentInfoItem}>
-              <Ionicons name="calendar-outline" size={20} color="white" />
-              <Text style={styles.appointmentInfoText}>Wed, 10 Jan, 2024</Text>
+            <View style={styles.detailItem}>
+              <FontAwesome name="calendar" size={14} color="white" />
+              <Text style={styles.detailText}>Wed, 10 Jan, 2024</Text>
             </View>
-            <View style={styles.appointmentInfoItem}>
-              <Ionicons name="time-outline" size={20} color="white" />
-              <Text style={styles.appointmentInfoText}>Mornig set: 11:00</Text>
+            <View style={styles.detailItem}>
+              <FontAwesome name="clock-o" size={14} color="white" />
+              <Text style={styles.detailText}>Mornig set: 11:00</Text>
             </View>
           </View>
         </View>
 
-        {/* Health Check Card */}
-        <View style={styles.healthCheckCard}>
-          <View style={styles.healthCheckTextContainer}>
-            <Text style={styles.healthCheckTitle}>Check Your Health Status</Text>
-            <TouchableOpacity style={styles.healthCheckButton}>
-              <Text style={styles.healthCheckButtonText}>Try Navariyan AI Now</Text>
+        {/* --- Health Status Card --- */}
+        <View style={styles.healthStatusCard}>
+          <View style={styles.healthStatusTextContainer}>
+            <Text style={styles.healthStatusTitle}>Check Your Health Status</Text>
+            <TouchableOpacity style={styles.tryNowButton}>
+              <Text style={styles.tryNowButtonText}>Try Navariyan AI Now</Text>
             </TouchableOpacity>
           </View>
-          <Image source={{ uri: DOCTOR_IMAGE_URL }} style={styles.doctorImage} />
+          <Image source={doctorIllustration} style={styles.doctorImage} />
         </View>
-        
-        {/* Heatstroke Alert */}
-        <View style={styles.alertCard}>
-            <Ionicons name="warning" size={24} color="#D97706" />
+
+        {/* --- Heatstroke Alert --- */}
+        <View style={styles.alertContainer}>
+            <FontAwesome name="warning" size={18} color="#FFA000" />
             <View style={styles.alertTextContainer}>
-                <Text style={styles.alertTitle}>Heatstroke Alert</Text>
-                <Text style={styles.alertBody}>
-                    Prolonged exposure to high temperatures can cause dehydration, dizziness, and unconsciousness. Stay hydrated.
-                </Text>
+              <Text style={styles.alertTitle}>Heatstroke Alert</Text>
+              <Text style={styles.alertMessage}>
+                Prolonged exposure to high temperatures can cause dehydration, dizziness, and unconsciousness. Stay hydrated...
+              </Text>
             </View>
         </View>
 
       </ScrollView>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#2D8C6E',
-  },
   container: {
     flex: 1,
-    backgroundColor: '#F4F6F9',
+    backgroundColor: '#4A934A',
   },
-  scrollContentContainer: {
-    paddingBottom: 20,
+  greenBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 250, // Adjust height as needed
+    backgroundColor: '#4A934A',
+    paddingTop: 40, // Adjust for status bar height if not using SafeAreaView
+    paddingHorizontal: 20,
   },
   header: {
-    backgroundColor: '#2D8C6E',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 80,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    marginTop: 30,
   },
-  headerTitle: {
+  greeting: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFFFFF',
   },
-  headerSubtitle: {
+  greetingSub: {
     fontSize: 16,
-    color: 'white',
+    color: '#FFFFFF',
   },
   welcomeText: {
     fontSize: 14,
-    color: 'white',
+    color: '#E0E0E0',
     marginTop: 8,
   },
-  mainCard: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-    marginHorizontal: 20,
-    marginTop: -60, // Pulls the card up into the header's padding
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+  profileIconContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 10,
+    borderRadius: 25,
   },
-  mainCardTitle: {
-    fontSize: 20,
+  whiteSheet: {
+    flex: 1,
+    marginTop: 220, // Position it below the header part of the green BG
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
+  whiteSheetContent: {
+    padding: 20,
+    paddingBottom: 40, // Extra padding at the bottom
+  },
+  mainTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#333333',
     marginBottom: 20,
   },
-  actionButtonsContainer: {
+  cardRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
-  actionButton: {
-    backgroundColor: '#F4F6F9',
+  card: {
+    backgroundColor: '#F7F7F7',
     borderRadius: 15,
     padding: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
     width: '48%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  actionButtonTextContainer: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  actionButtonTitle: {
-    fontSize: 14,
+  cardTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    marginTop: 10,
+    color: '#333333',
   },
-  actionButtonSubtitle: {
+  cardSubtitle: {
     fontSize: 12,
-    color: '#6c757d',
-    marginTop: 2,
+    color: '#666666',
+    marginTop: 4,
   },
   appointmentCard: {
-    backgroundColor: '#4A9D9C',
+    backgroundColor: '#5D9C9C',
     borderRadius: 15,
-    padding: 20,
-    marginHorizontal: 20,
-    marginTop: 20,
+    padding: 15,
+    marginBottom: 20,
   },
   appointmentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+  },
+  appointmentInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  calendarIconBg: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    padding: 8,
+    borderRadius: 10,
+    marginRight: 10,
   },
   appointmentTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFFFFF',
   },
   appointmentSubtitle: {
     fontSize: 14,
-    color: '#E0F2F1',
+    color: '#E0E0E0',
   },
   appointmentDetails: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 10,
+    marginTop: 15,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    paddingTop: 15,
   },
-  appointmentInfoItem: {
+  detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  appointmentInfoText: {
-    color: 'white',
+  detailText: {
+    color: '#FFFFFF',
     marginLeft: 8,
-    fontSize: 13,
+    fontSize: 12,
   },
-  healthCheckCard: {
-    backgroundColor: '#E0F2E9',
+  healthStatusCard: {
+    backgroundColor: '#E8F5E9',
     borderRadius: 15,
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 20,
+    padding: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    overflow: 'hidden',
+    marginBottom: 20,
+    overflow: 'hidden', // to contain the image properly
   },
-  healthCheckTextContainer: {
+  healthStatusTextContainer: {
     flex: 1,
   },
-  healthCheckTitle: {
-    fontSize: 18,
+  healthStatusTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#1E4639',
-    marginBottom: 15,
+    color: '#388E3C',
   },
-  healthCheckButton: {
-    backgroundColor: '#2A7E64',
-    paddingVertical: 10,
+  tryNowButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
+    paddingVertical: 8,
     paddingHorizontal: 15,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
+    marginTop: 10,
+    alignSelf: 'flex-start', // Don't stretch button
   },
-  healthCheckButtonText: {
-    color: 'white',
+  tryNowButtonText: {
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   doctorImage: {
     width: 100,
     height: 120,
-    resizeMode: 'contain',
-    marginRight: -20, // Allows image to bleed out of the card
+    position: 'absolute',
+    right: 0,
+    bottom: -15, // Positioned slightly outside the card
   },
-  alertCard: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 15,
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 15,
+  alertContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
+    backgroundColor: '#FFF8E1',
+    padding: 15,
+    borderRadius: 10,
   },
   alertTextContainer: {
     marginLeft: 10,
     flex: 1,
   },
   alertTitle: {
-    fontSize: 15,
     fontWeight: 'bold',
-    color: '#B45309',
+    color: '#FFA000',
   },
-  alertBody: {
-    fontSize: 13,
-    color: '#78350F',
+  alertMessage: {
+    color: '#666',
     marginTop: 4,
+    fontSize: 12,
     lineHeight: 18,
   },
 });
-
-export default HealthAppScreen;
