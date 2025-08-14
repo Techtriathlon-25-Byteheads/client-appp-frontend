@@ -1,7 +1,8 @@
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, Image } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { Feather, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Link } from 'expo-router'; // <-- Import Link
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // A placeholder for the doctor illustration
 const doctorIllustration = require('../assets/images/doctor-illustration.png');
@@ -15,7 +16,7 @@ export default function App() {
       <View style={styles.greenBackground}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Ayubowan, Yasiru!</Text>
+            <Text style={styles.greeting}>Ayubowan, yasuru!</Text>
             <Text style={styles.greetingSub}>ආයුබෝවන්, යසිරු!</Text>
             <Text style={styles.greetingSub}>வணக்கம், யசிரு!</Text>
             <Text style={styles.welcomeText}>Welcome to National Health Hub of Sri Lanka.</Text>
@@ -35,11 +36,14 @@ export default function App() {
 
         {/* --- Action Cards --- */}
         <View style={styles.cardRow}>
-          <TouchableOpacity style={styles.card}>
-            <FontAwesome name="calendar-plus-o" size={24} color="#4A934A" />
-            <Text style={styles.cardTitle}>Book an Apppointment</Text>
-            <Text style={styles.cardSubtitle}>Book a Doctor or scan</Text>
-          </TouchableOpacity>
+          {/* --- Updated this card --- */}
+          <Link href="/book-appointment" asChild>
+            <TouchableOpacity style={styles.card}>
+              <FontAwesome name="calendar-plus-o" size={24} color="#4A934A" />
+              <Text style={styles.cardTitle}>Book an Apppointment</Text>
+              <Text style={styles.cardSubtitle}>Book a Doctor or scan</Text>
+            </TouchableOpacity>
+          </Link>
           <TouchableOpacity style={styles.card}>
             <FontAwesome name="file-text-o" size={24} color="#4A934A" />
             <Text style={styles.cardTitle}>My Reports</Text>
