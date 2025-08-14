@@ -1,5 +1,5 @@
 import { Feather, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Link } from 'expo-router'; // <-- Import Link
+import { Link, } from 'expo-router'; // <-- Import Link and useRouter
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -21,9 +21,11 @@ export default function App() {
             <Text style={styles.greetingSub}>வணக்கம், யசிரு!</Text>
             <Text style={styles.welcomeText}>Welcome to National Health Hub of Sri Lanka.</Text>
           </View>
+          <Link href="/login" asChild>
           <TouchableOpacity style={styles.profileIconContainer}>
             <Feather name="user" size={28} color="#4A934A" />
           </TouchableOpacity>
+        </Link>
         </View>
       </View>
 
@@ -52,32 +54,38 @@ export default function App() {
         </View>
 
         {/* --- General Appointment Card --- */}
-        <View style={styles.appointmentCard}>
-          <View style={styles.appointmentHeader}>
-            <View style={styles.appointmentInfo}>
-              <View style={styles.calendarIconBg}>
-                <FontAwesome name="calendar" size={18} color="#5D9C9C" />
-              </View>
-              <View>
-                <Text style={styles.appointmentTitle}>General Appointment</Text>
-                <Text style={styles.appointmentSubtitle}>OPD @ Colombo National Hospital</Text>
-              </View>
-            </View>
-            <TouchableOpacity>
-              <MaterialCommunityIcons name="arrow-top-right" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.appointmentDetails}>
-            <View style={styles.detailItem}>
-              <FontAwesome name="calendar" size={14} color="white" />
-              <Text style={styles.detailText}>Wed, 10 Jan, 2024</Text>
-            </View>
-            <View style={styles.detailItem}>
-              <FontAwesome name="clock-o" size={14} color="white" />
-              <Text style={styles.detailText}>Mornig set: 11:00</Text>
-            </View>
-          </View>
+  <Link href="/appointments" asChild>
+  <TouchableOpacity style={styles.appointmentCard} activeOpacity={0.8}>
+    <View style={styles.appointmentHeader}>
+      <View style={styles.appointmentInfo}>
+        <View style={styles.calendarIconBg}>
+          <FontAwesome name="calendar" size={18} color="#5D9C9C" />
         </View>
+        <View>
+          <Text style={styles.appointmentTitle}>General Appointment</Text>
+          <Text style={styles.appointmentSubtitle}>OPD @ Colombo National Hospital</Text>
+        </View>
+      </View>
+
+      {/* (Optional) keep this as a separate button or remove it since the whole card is pressable */}
+      <TouchableOpacity>
+        <MaterialCommunityIcons name="arrow-top-right" size={24} color="white" />
+      </TouchableOpacity>
+    </View>
+
+    <View style={styles.appointmentDetails}>
+      <View style={styles.detailItem}>
+        <FontAwesome name="calendar" size={14} color="white" />
+        <Text style={styles.detailText}>Wed, 10 Jan, 2024</Text>
+      </View>
+      <View style={styles.detailItem}>
+        <FontAwesome name="clock-o" size={14} color="white" />
+        <Text style={styles.detailText}>Mornig set: 11:00</Text>
+      </View>
+    </View>
+  </TouchableOpacity>
+</Link>
+
 
         {/* --- Health Status Card --- */}
         <View style={styles.healthStatusCard}>
@@ -141,6 +149,7 @@ const styles = StyleSheet.create({
     color: '#E0E0E0',
     marginTop: 8,
   },
+  
   profileIconContainer: {
     backgroundColor: '#FFFFFF',
     padding: 10,
