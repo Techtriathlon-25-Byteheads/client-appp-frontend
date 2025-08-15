@@ -1,22 +1,23 @@
 // app/otp.tsx
+import { router, useLocalSearchParams } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  View,
-  Text,
   Image,
-  TextInput,
-  TouchableOpacity,
   KeyboardAvoidingView,
+  NativeSyntheticEvent,
   Platform,
   Pressable,
-  NativeSyntheticEvent,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
   TextInputKeyPressEventData,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { api, ApiError } from '../services/api';
 
 const heroImage = require('../assets/images/doctor-illustration.png');
 
@@ -37,12 +38,14 @@ const maskSriLankaPhone = (raw: string) => {
 };
 
 export default function OTP() {
-  const { phone = '', lang = 'en' } = useLocalSearchParams<{ phone?: string; lang?: Lang }>();
+  const { phone = '', userId = '', lang = 'en' } = useLocalSearchParams<{ phone?: string; userId?: string; lang?: Lang }>();
   const L: Lang = (['si', 'ta', 'en'] as const).includes(lang as Lang) ? (lang as Lang) : 'en';
   const insets = useSafeAreaInsets();
 
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [seconds, setSeconds] = useState(30);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputs = useRef<Array<TextInput | null>>([]);
 
   // Focus first box on mount
@@ -91,10 +94,45 @@ export default function OTP() {
     }
   };
 
-  const onResend = () => {
+  const onResend = async () => {
     if (seconds > 0) return;
-    // TODO: call resend API
-    setSeconds(30);
+    try {
+      setIsLoading(true);
+      setError('');
+      const response = await api.login(userId, phone);
+      setSeconds(30);
+    } catch (error) {
+      setError('Failed to resend OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    const code = digits.join('');
+    if (code.length !== 6) {
+      setError('Please enter all 6 digits');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError('');
+      const response = await api.verifyOTP(userId, code);
+      // Here you should save the token securely and navigate
+      router.replace('/');
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setError(error.message);
+      } else {
+        setError('Failed to verify OTP. Please try again.');
+      }
+      // Clear digits on error
+      setDigits(['', '', '', '', '', '']);
+      inputs.current[0]?.focus();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const code = digits.join('');
@@ -155,16 +193,24 @@ export default function OTP() {
             ))}
           </Pressable>
 
+          {/* Error message */}
+          {error ? (
+            <Text style={[styles.muted, { color: '#DC2626', marginTop: 8 }]}>{error}</Text>
+          ) : null}
+
           {/* CTA */}
           <TouchableOpacity
-            style={[styles.primaryBtn, code.length < 6 && styles.primaryBtnDisabled]}
+            style={[
+              styles.primaryBtn,
+              (isLoading || code.length < 6) && styles.primaryBtnDisabled
+            ]}
             activeOpacity={0.9}
-            disabled={code.length < 6}
-            onPress={() => {
-              // TODO: verify `code`, then navigate to the next screen
-            }}
+            disabled={isLoading || code.length < 6}
+            onPress={verifyOTP}
           >
-            <Text style={styles.primaryBtnText}>{T[L].cta}</Text>
+            <Text style={styles.primaryBtnText}>
+              {isLoading ? 'Verifying...' : T[L].cta}
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

@@ -16,7 +16,7 @@ export default function App() {
       <View style={styles.greenBackground}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Ayubowan, yasuru!</Text>
+            <Text style={styles.greeting}>Ayubowan, yasiru!</Text>
             <Text style={styles.greetingSub}>ආයුබෝවන්, යසිරු!</Text>
             <Text style={styles.greetingSub}>வணக்கம், யசிரு!</Text>
             <Text style={styles.welcomeText}>Welcome to National Health Hub of Sri Lanka.</Text>
@@ -152,8 +152,12 @@ const styles = StyleSheet.create({
   
   profileIconContainer: {
     backgroundColor: '#FFFFFF',
-    padding: 10,
-    borderRadius: 25,
+    padding: 12,
+    borderRadius: 50,
+    width: 52,
+    height: 52,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   whiteSheet: {
     flex: 1,

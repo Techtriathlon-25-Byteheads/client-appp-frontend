@@ -221,7 +221,15 @@ const styles = StyleSheet.create({
   headerRow: { marginTop: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   backBtn: { flexDirection: 'row', alignItems: 'center' },
   backText: { color: '#FFFFFF', fontSize: 16, marginLeft: 8 },
-  profileIconContainer: { backgroundColor: SURFACE, padding: 10, borderRadius: 20 },
+  profileIconContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: 50,
+    width: 52,
+    height: 52,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   sheet: { flex: 1, backgroundColor: SURFACE, borderTopLeftRadius: 24, borderTopRightRadius: 24, marginTop: -20 },
   sheetContent: { padding: 20, paddingBottom: 40 },

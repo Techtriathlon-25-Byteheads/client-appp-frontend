@@ -1,28 +1,29 @@
 // app/login.tsx
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Feather } from '@expo/vector-icons';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
   Animated,
   Dimensions,
-  Platform,
-  StatusBar as RNStatusBar,
-  ScrollView,
-  Pressable,
   KeyboardAvoidingView,
-  NativeSyntheticEvent,
   NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+  Pressable,
+  StatusBar as RNStatusBar,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
-import { Link } from 'expo-router';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { api } from '../services/api';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H_LOGIN = SCREEN_H * 0.75;   // 3/4 for Log In
@@ -57,13 +58,15 @@ const I18N: Record<Lang, Record<string, string>> = {
     adultTitle: 'Adult patient',
     adultSub: 'Is the patient 18 year or older',
     rememberMe: 'Remember me',
-    needHelp: 'Need Help ?',
     chooseLanguage: 'Choose Your Preferred Language',
     ctaLogin: 'Log in',
     ctaSignup: 'Sign Up',
     lang_si: 'සිං',
     lang_ta: 'தமிழ்',
     lang_en: 'En',
+    phoneError: 'Please enter a valid 10-digit phone number',
+    phoneErrorNonNumeric: 'Phone number can only contain numbers',
+    phoneErrorLength: 'Phone number must be exactly 10 digits',
   },
   si: {
     getStartedTitle: 'දැන් ආරම්භ කරන්න',
@@ -133,6 +136,10 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState('');
   const [nic, setNic] = useState('');
   const [remember, setRemember] = useState(false);
+  const [otpMode, setOtpMode] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [userId, setUserId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // signup fields
   const [fullName, setFullName] = useState('');
@@ -187,33 +194,111 @@ export default function LoginScreen() {
 
   // ---- helpers ----
   const digitsOnly = (s: string) => (s || '').replace(/\D/g, '');
-  const has9or10Digits = (s: string) => {
-    const n = digitsOnly(s).length;
-    return n === 9 || n === 10;
+  const getPhoneError = (value: string): string | null => {
+    if (!value) return null;
+    if (value !== digitsOnly(value)) return t('phoneErrorNonNumeric');
+    const digits = digitsOnly(value);
+    if (digits.length !== 10) return t('phoneErrorLength');
+    return null;
   };
+  const isValidPhone = (s: string) => !getPhoneError(s);
   const nicOK = (s: string) => (s || '').trim().length >= 6;
   const notEmpty = (s: string) => (s || '').trim().length > 0;
   const dobOK = (d: Date | null) => !!d && d.getTime() > MIN_DOB.getTime() && d.getTime() <= TODAY.getTime();
   const fmtDate = (d?: Date | null) => (d ? `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}` : '');
 
-  const validateLogin = () => {
+  const validateLogin = async () => {
     const next: Record<string, boolean> = {};
-    next.phone = !has9or10Digits(phone);
+    next.phone = !isValidPhone(phone);
     next.nic = !nicOK(nic);
     setErrors(next);
-    return !next.phone && !next.nic;
+    
+    if (!next.phone && !next.nic) {
+      try {
+        setIsLoading(true);
+        const response = await api.login(nic, phone);
+        // Navigate to OTP screen with necessary params
+        router.push({
+          pathname: '/otp',
+          params: {
+            userId: response.userId,
+            phone: phone,
+            lang: lang
+          }
+        });
+        return true;
+      } catch (error) {
+        setErrors(e => ({ ...e, apiError: true }));
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    return false;
   };
 
-  const validateSignup = () => {
+  const handleVerifyOTP = async () => {
+    if (!otp) {
+      setErrors(e => ({ ...e, otp: true }));
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await api.verifyOTP(userId, otp);
+      // Save token in secure storage or context
+      // For now, just navigate to home
+      router.replace('/');
+    } catch (error) {
+      setErrors(e => ({ ...e, otpError: true }));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const validateSignup = async () => {
     const next: Record<string, boolean> = {};
     next.fullName = !notEmpty(fullName);
     next.nic = !nicOK(nic);
     next.dob = !dobOK(dob);
     next.address = !notEmpty(address);
-    next.contact = !has9or10Digits(contact);
+    next.contact = !isValidPhone(contact);
     setErrors(next);
-    // return true only if all false
-    return Object.values(next).every(v => !v);
+
+    if (Object.values(next).every(v => !v)) {
+      try {
+        setIsLoading(true);
+        // Split address into street and city (assuming format: "No.8, Cross Road, Galle")
+        const addressParts = address.split(',');
+        const city = addressParts.pop()?.trim() || '';
+        const street = addressParts.join(',').trim();
+
+        const response = await api.signup({
+          fullName,
+          nic,
+          dob: dob?.toISOString().split('T')[0] || '',
+          address: { street, city },
+          contactNumber: contact,
+        });
+
+        // Navigate to OTP screen with necessary params
+        router.push({
+          pathname: '/otp',
+          params: {
+            userId: response.userId,
+            phone: contact, // use contact number for signup
+            lang: lang
+          }
+        });
+        return true;
+      } catch (error) {
+        setErrors(e => ({ ...e, apiError: true }));
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    return false;
   };
 
   // clear a field's error on change
@@ -222,10 +307,16 @@ export default function LoginScreen() {
   // DOB picker
   const [showDobPicker, setShowDobPicker] = useState(false);
   const onPickDob = (event: DateTimePickerEvent, selected?: Date) => {
-    if (Platform.OS === 'android') setShowDobPicker(false);
-    if (event.type === 'dismissed') return;
-    const chosen = selected || dob || TODAY;
-    setDob(chosen);
+    if (Platform.OS === 'android') {
+      setShowDobPicker(false);
+    }
+    
+    if (event.type === 'set' && selected) {
+      setDob(selected);
+      clearErr('dob');
+    } else if (event.type === 'dismissed' && Platform.OS === 'ios') {
+      setShowDobPicker(false);
+    }
     clearErr('dob');
   };
 
@@ -293,13 +384,24 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.input}
                     value={phone}
-                    onChangeText={(v) => { setPhone(v); clearErr('phone'); }}
+                    onChangeText={(v) => {
+                      if (v !== digitsOnly(v)) return; // Only allow numeric input
+                      const digits = digitsOnly(v);
+                      if (digits.length <= 10) {
+                        setPhone(digits);
+                        clearErr('phone');
+                      }
+                    }}
                     placeholder={t('phonePlaceholder')}
                     placeholderTextColor="#9AA3AE"
                     keyboardType="phone-pad"
                     returnKeyType="next"
+                    maxLength={10}
                   />
                 </View>
+                {errors.phone && phone && (
+                  <Text style={styles.errorText}>{getPhoneError(phone)}</Text>
+                )}
 
                 <Text style={styles.label}>{t('nicLabel')}</Text>
                 <View style={[styles.inputWrapper, errors.nic && styles.inputError]}>
@@ -358,23 +460,44 @@ export default function LoginScreen() {
                   activeOpacity={0.8}
                   onPress={() => setShowDobPicker(true)}
                 >
-                  <View style={[styles.inputWrapper, errors.dob && styles.inputError, { justifyContent: 'center' }]}>
-                    <Text style={[styles.input, { color: dob ? '#111827' : '#9AA3AE' }]}>
+                  <View style={[styles.inputWrapper, errors.dob && styles.inputError, { justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }]}>
+                    <Text style={[styles.input, { color: dob ? '#111827' : '#9AA3AE', flex: 1 }]}>
                       {dob ? fmtDate(dob) : t('dobPlaceholder')}
                     </Text>
+                    <Feather name="calendar" size={20} color="#6B7280" />
                   </View>
                 </TouchableOpacity>
 
-                {showDobPicker && (
+                {showDobPicker && (Platform.OS === 'ios' ? (
+                  <View style={styles.datePickerContainer}>
+                    <DateTimePicker
+                      value={dob || new Date(1990, 0, 1)}
+                      mode="date"
+                      display="inline"
+                      onChange={onPickDob}
+                      minimumDate={MIN_DOB}
+                      maximumDate={TODAY}
+                      textColor="#111827"
+                      accentColor="#4A934A"
+                      style={{ height: 400 }}
+                    />
+                    <TouchableOpacity
+                      style={styles.datePickerDoneBtn}
+                      onPress={() => setShowDobPicker(false)}
+                    >
+                      <Text style={styles.datePickerDoneText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                   <DateTimePicker
                     value={dob || new Date(1990, 0, 1)}
                     mode="date"
-                    display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                    display="default"
                     onChange={onPickDob}
                     minimumDate={MIN_DOB}
                     maximumDate={TODAY}
                   />
-                )}
+                ))}
 
                 <Text style={styles.label}>{t('addressLabel')}</Text>
                 <View style={[styles.inputWrapper, errors.address && styles.inputError]}>
@@ -393,13 +516,24 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.input}
                     value={contact}
-                    onChangeText={(v) => { setContact(v); clearErr('contact'); }}
+                    onChangeText={(v) => {
+                      if (v !== digitsOnly(v)) return; // Only allow numeric input
+                      const digits = digitsOnly(v);
+                      if (digits.length <= 10) {
+                        setContact(digits);
+                        clearErr('contact');
+                      }
+                    }}
                     placeholder={t('contactPlaceholder')}
                     placeholderTextColor="#9AA3AE"
                     keyboardType="phone-pad"
                     returnKeyType="done"
+                    maxLength={10}
                   />
                 </View>
+                {errors.contact && contact && (
+                  <Text style={styles.errorText}>{getPhoneError(contact)}</Text>
+                )}
               </>
             )}
 
@@ -462,37 +596,38 @@ export default function LoginScreen() {
 
             {/* CTA: Link for Sign Up → /otp (blocked on invalid), plain button for Log In */}
             {mode === 'signup' ? (
-              <Link
-                href={{
-                  pathname: '/otp',
-                  params: { phone: (contact?.trim() || phone?.trim() || ''), lang },
+              <TouchableOpacity
+                style={[styles.primaryBtn, isLoading && { opacity: 0.7 }]}
+                activeOpacity={0.9}
+                disabled={isLoading}
+                onPress={async () => {
+                  if (otpMode) {
+                    await handleVerifyOTP();
+                  } else {
+                    await validateSignup();
+                  }
                 }}
-                asChild
               >
-                <TouchableOpacity
-                  style={styles.primaryBtn}
-                  activeOpacity={0.9}
-                  onPress={(e: any) => {
-                    const ok = validateSignup();
-                    if (!ok) {
-                      // prevent Link navigation
-                      if (e?.preventDefault) e.preventDefault();
-                    }
-                  }}
-                >
-                  <Text style={styles.primaryBtnText}>{ctaLabel}</Text>
-                </TouchableOpacity>
-              </Link>
+                <Text style={styles.primaryBtnText}>
+                  {isLoading ? 'Please wait...' : otpMode ? 'Verify OTP' : ctaLabel}
+                </Text>
+              </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                style={styles.primaryBtn}
+                style={[styles.primaryBtn, isLoading && { opacity: 0.7 }]}
                 activeOpacity={0.9}
-                onPress={() => {
-                  validateLogin();
-                  // submit if you want when valid; for now just highlighting errors
+                disabled={isLoading}
+                onPress={async () => {
+                  if (otpMode) {
+                    await handleVerifyOTP();
+                  } else {
+                    await validateLogin();
+                  }
                 }}
               >
-                <Text style={styles.primaryBtnText}>{ctaLabel}</Text>
+                <Text style={styles.primaryBtnText}>
+                  {isLoading ? 'Please wait...' : otpMode ? 'Verify OTP' : ctaLabel}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -620,4 +755,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  errorText: { color: '#DC2626', fontSize: 12, marginTop: 4, marginLeft: 4 },
+
+  // Date picker styles
+  datePickerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginTop: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  datePickerDoneBtn: {
+    backgroundColor: '#4A934A',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  datePickerDoneText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
