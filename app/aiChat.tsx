@@ -22,7 +22,7 @@ import { router } from "expo-router";
 import TypingIndicator from "@/assets/components/TypingIndicator";
 const Icon = require("@/assets/images/chatIcon.png");
 
-const WS_URL = "ws://172.20.10.2:8000/ws/test123";
+const WS_URL = "ws://localhost:8000/ws/test123";
 
 type ActionDetails = {
   type: "call" | "email" | "book";

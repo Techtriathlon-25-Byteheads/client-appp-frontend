@@ -79,7 +79,7 @@ export default function HomeScreen() {
       greeting: `Ayubowan, ${greeting}!`,
       greetingSmall1: "Welcome message in English",
       greetingSmall2: "Another English text",
-      subtitle: "Welcome to Goverse Government Services Portal",
+      subtitle: "Welcome to GovQ Government Services Portal",
       popularServices: "Popular Services",
       ongoingAppointments: "Ongoing Appointments",
       seeAllServices: "See All Services →",

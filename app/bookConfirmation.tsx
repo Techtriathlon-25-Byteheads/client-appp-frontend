@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useMemo } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// --- Color Palette ---
+
 const BRAND_GREEN = '#4A934A';
 const SURFACE = '#FFFFFF';
 const TEXT_PRIMARY = '#1E1E1E';
@@ -20,13 +20,13 @@ export default function BookingConfirmation() {
 
   const formattedTime = useMemo(() => {
     if (!time || typeof time !== 'string') {
-      return '11:00'; // Default or fallback time
+      return '11:00'; 
     }
     try {
       const dateObj = new Date(time);
       // Check if the date is valid
       if (isNaN(dateObj.getTime())) {
-        return time; // Return original string if invalid
+        return time; 
       }
       return dateObj.toLocaleTimeString('en-US', {
         hour: 'numeric',
@@ -35,7 +35,7 @@ export default function BookingConfirmation() {
       });
     } catch (error) {
       console.error("Failed to parse time:", error);
-      return time; // Return original string on error
+      return time; 
     }
   }, [time]);
 

@@ -10,7 +10,7 @@ export default function RootLayout() {
             try {
                 const token = await AsyncStorage.getItem("userToken");
 
-                if (!userToken) {
+                if (!token) {
                     router.replace("/login");
                 } else {
                     router.replace("/");
