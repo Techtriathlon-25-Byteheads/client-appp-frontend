@@ -1,4 +1,4 @@
-const BASE_URL = 'https://seminar-zoo-online-patrick.trycloudflare.com/api';
+const BASE_URL = 'https://tt25.tharusha.dev/api';
 
 export interface LoginResponse {
   message: string;

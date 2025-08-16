@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -38,6 +38,7 @@ import {
   Inter_800ExtraBold_Italic,
   Inter_900Black_Italic,
 } from "@expo-google-fonts/inter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import AppointmentSlider from "@/assets/components/appointmentScroll";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -66,23 +67,131 @@ export default function HomeScreen() {
     Inter_900Black_Italic,
     FMEmanee: require("@/assets/fonts/FMEmanee.ttf"),
   });
-
+  const [lang, setLang] = useState<"en" | "si" | "ta">("en");
   const [query, setQuery] = useState("");
+  const [greeting, setGreeting] = useState("");
+  const [fontFamily, setFontFamily] = useState<string | undefined>(undefined);
+
+  const translations = {
+    en: {
+      greeting: `Ayubowan, ${greeting}!`,
+      greetingSmall1: "Welcome message in English",
+      greetingSmall2: "Another English text",
+      subtitle: "Welcome to Goverse Government Services Portal",
+      popularServices: "Popular Services",
+      ongoingAppointments: "Ongoing Appointments",
+      seeAllServices: "See All Services →",
+      searchPlaceholder: 'Search for a Service, Try "Driver\'s License"',
+    },
+    si: {
+      greeting: `wdhqfndajka ${greeting}`,
+      subtitle: "rcfha fiajd oajdrh fj; ms<s.ekSu",
+      popularServices: "ckm%sh fiajd",
+      ongoingAppointments: "bÈß.; úia;r",
+      seeAllServices: "ish¨ fiajd n,kak →",
+      searchPlaceholder: 'fiajdjla fidhkak" Wod( ßhÿre n,m;%h',
+    },
+    ta: {
+      greeting: "வணக்கம், யசிரு!",
+      subtitle: "Goverse அரசு சேவை வாயிலுக்கு வரவேற்பு",
+      popularServices: "பிரபலமான சேவைகள்",
+      ongoingAppointments: "நடப்புக் கால அப்பாயிண்மெண்ட்ஸ்",
+      seeAllServices: "அனைத்து சேவைகளும் காண →",
+      searchPlaceholder: 'சேவையைத் தேடவும், உதாரணம்: "ஓட்டுனர் அனுமதி"',
+    },
+  };
+
+  useEffect(() => {
+    const loadLanguage = async () => {
+      try {
+        const savedLang = await AsyncStorage.getItem("appLanguage");
+        if (savedLang && ["en", "si", "ta"].includes(savedLang)) {
+          setLang(savedLang as "en" | "si" | "ta");
+        }
+      } catch (err) {
+        console.log("Error loading language:", err);
+      }
+    };
+
+    loadLanguage();
+
+    const getTimeBasedGreeting = (lang: "en" | "si" | "ta") => {
+      const hour = new Date().getHours();
+      let greeting = "";
+
+      if (hour >= 5 && hour < 12) {
+        // Morning
+        greeting =
+          lang === "si"
+            ? "iqN WoEiklaæ" // Sinhala
+            : lang === "ta"
+            ? "காலை வணக்கம்!" // Tamil
+            : "Good Morning!"; // English
+      } else if (hour >= 12 && hour < 17) {
+        // Afternoon
+        greeting =
+          lang === "si"
+            ? "iqN oyj,​laæ"
+            : lang === "ta"
+            ? "நண்பகல் வணக்கம்!"
+            : "Good Afternoon!";
+      } else {
+        // Evening
+        greeting =
+          lang === "si"
+            ? "iqN iekaoEjlaæ"
+            : lang === "ta"
+            ? "மாலை வணக்கம்!"
+            : "Good Evening";
+      }
+      return greeting;
+    };
+
+    const greeting = getTimeBasedGreeting(lang);
+    setGreeting(greeting);
+
+    const logAllStorage = async () => {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        const stores = await AsyncStorage.multiGet(keys);
+        let myStorage: Record<string, string | null> = {};
+        stores.forEach(([key, value]) => {
+          myStorage[key] = value;
+        });
+        console.log("CURRENT STORAGE: ", myStorage);
+      } catch (err) {
+        console.log("Error reading storage:", err);
+      }
+    };
+    logAllStorage();
+  }, []);
+
+  useEffect(() => {
+    if (lang === "si") setFontFamily("FMEmanee");
+    else if (lang === "ta") setFontFamily("FMEmanee");
+    else setFontFamily(undefined);
+  }, [lang]);
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Fixed green background */}
       <View style={styles.headerContent}>
         <View>
-          <Text style={styles.greeting}>Ayubowan, Yasiru!</Text>
-          <Text style={styles.greetingSmall}>whqfndajka" hisreæ</Text>
-          <Text style={styles.greetingSmall}>வணக்கம்" யசிருæ</Text>
+          <Text style={[styles.greeting]}>{translations["en"].greeting}</Text>
+
+          <Text style={[styles.greetingSmall]}>
+            {translations["si"].greeting}
+          </Text>
+
+          <Text style={[styles.greetingSmall, { fontFamily: fontFamily }]}>
+            {translations["ta"].greeting}
+          </Text>
         </View>
         <Ionicons name="person-circle-outline" size={50} color="#fff" />
       </View>
       <View style={styles.subContent}>
-        <Text style={styles.subtitle}>
-          Welcome to Goverse Government Services Portal
+        <Text style={[styles.subtitle, { fontFamily: fontFamily }]}>
+          {translations[lang].subtitle}
         </Text>
       </View>
 
@@ -94,8 +203,8 @@ export default function HomeScreen() {
         <View style={styles.searchContainer}>
           <Feather name="search" size={20} color="#666" style={styles.icon} />
           <TextInput
-            style={styles.input}
-            placeholder={'Search for a Service, Try "Driver\'s License"'}
+            style={[styles.input, { fontFamily: fontFamily }]}
+            placeholder={translations[lang].searchPlaceholder}
             value={query}
             onChangeText={setQuery}
             placeholderTextColor="#999"
@@ -111,7 +220,9 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         {/* Popular Services */}
-        <Text style={styles.sectionTitle}>Popular Services</Text>
+        <Text style={[styles.sectionTitle, { fontFamily: fontFamily }]}>
+          {translations[lang].popularServices}
+        </Text>
         <View style={styles.serviceGrid}>
           {[
             "National Identity Card Services",
@@ -131,11 +242,15 @@ export default function HomeScreen() {
           ))}
         </View>
         <TouchableOpacity style={styles.seeAllButton}>
-          <Text style={styles.seeAllText}>See All Services →</Text>
+          <Text style={[styles.seeAllText, { fontFamily: fontFamily }]}>
+            {translations[lang].seeAllServices}
+          </Text>
         </TouchableOpacity>
 
         {/* Ongoing Appointments */}
-        <Text style={styles.sectionTitle}>Ongoing Appointments</Text>
+        <Text style={[styles.sectionTitle, { fontFamily: fontFamily }]}>
+          {translations[lang].ongoingAppointments}
+        </Text>
         <AppointmentSlider />
 
         {/* Health Check */}
@@ -177,7 +292,7 @@ const styles = StyleSheet.create({
     width: "100%",
     fontFamily: "Inter_500Medium",
     color: "#fff",
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: "500",
   },
   greetingSmall: {
