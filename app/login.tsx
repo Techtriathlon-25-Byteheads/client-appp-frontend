@@ -23,6 +23,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SRI_LANKA_CITIES } from '../constants/cities';
 import { api } from '../services/api';
 
 const { height: SCREEN_H } = Dimensions.get('window');
@@ -51,8 +52,10 @@ const I18N: Record<Lang, Record<string, string>> = {
     dobPlaceholder: 'Select date',
     fullNameLabel: 'Full Name',
     fullNamePlaceholder: 'John Doe',
-    addressLabel: 'Address',
-    addressPlaceholder: 'No.8, Cross Road, Galle',
+    streetLabel: 'Street Address',
+    streetPlaceholder: 'No.8, Cross Road',
+    cityLabel: 'City',
+    cityPlaceholder: 'Select your city',
     contactLabel: 'Contact Number',
     contactPlaceholder: '07* *** **32',
     adultTitle: 'Adult patient',
@@ -81,14 +84,15 @@ const I18N: Record<Lang, Record<string, string>> = {
     dobPlaceholder: 'දිනය තෝරන්න',
     fullNameLabel: 'සම්පූර්ණ නම',
     fullNamePlaceholder: 'John Doe',
-    addressLabel: 'ලිපිනය',
-    addressPlaceholder: 'No.8, Cross Road, Galle',
+    streetLabel: 'වීදි ලිපිනය',
+    streetPlaceholder: 'No.8, Cross Road',
+    cityLabel: 'නගරය',
+    cityPlaceholder: 'ඔබේ නගරය තෝරන්න',
     contactLabel: 'සම්බන්ධතා අංකය',
     contactPlaceholder: '07* *** **32',
     adultTitle: 'වැඩිවියන රෝගියා',
     adultSub: 'රෝගියා අවුරුදු 18 ක් හෝ ඊට වැඩියෙක්ද?',
     rememberMe: 'මාව මතක තබන්න',
-    needHelp: 'උදව් අවශ්‍යද ?',
     chooseLanguage: 'ඔබ කැමති භාෂාව තෝරන්න',
     ctaLogin: 'පිවිසෙන්න',
     ctaSignup: 'ලියාපදිංචි වන්න',
@@ -109,14 +113,15 @@ const I18N: Record<Lang, Record<string, string>> = {
     dobPlaceholder: 'தேதியைத் தேர்வு செய்க',
     fullNameLabel: 'முழு பெயர்',
     fullNamePlaceholder: 'John Doe',
-    addressLabel: 'முகவரி',
-    addressPlaceholder: 'No.8, Cross Road, Galle',
+    streetLabel: 'வீதி முகவரி',
+    streetPlaceholder: 'No.8, Cross Road',
+    cityLabel: 'நகரம்',
+    cityPlaceholder: 'உங்கள் நகரத்தைத் தேர்ந்தெடுக்கவும்',
     contactLabel: 'தொடர்பு எண்',
     contactPlaceholder: '07* *** **32',
     adultTitle: 'வயது வந்த நோயாளர்',
     adultSub: 'நோயாளி 18 வயது அல்லது அதற்கு மேற்பட்டவரா',
     rememberMe: 'என்னை நினைவில் வை',
-    needHelp: 'உதவி வேண்டுமா ?',
     chooseLanguage: 'உங்களின் விருப்ப மொழியைத் தேர்வு செய்யவும்',
     ctaLogin: 'உள்நுழைக',
     ctaSignup: 'பதிவு செய்ய',
@@ -145,8 +150,10 @@ export default function LoginScreen() {
   const [fullName, setFullName] = useState('');
   const [adult, setAdult] = useState(true);
   const [dob, setDob] = useState<Date | null>(null);
-  const [address, setAddress] = useState('');
+  const [street, setStreet] = useState('');
+  const [city, setCity] = useState<string>('');
   const [contact, setContact] = useState('');
+  const [showCityPicker, setShowCityPicker] = useState(false);
 
   // validation flags
   const [errors, setErrors] = useState<Record<string, boolean>>({});
@@ -261,17 +268,15 @@ export default function LoginScreen() {
     next.fullName = !notEmpty(fullName);
     next.nic = !nicOK(nic);
     next.dob = !dobOK(dob);
-    next.address = !notEmpty(address);
+    next.street = !notEmpty(street);
+    next.city = !notEmpty(city);
     next.contact = !isValidPhone(contact);
     setErrors(next);
 
     if (Object.values(next).every(v => !v)) {
       try {
         setIsLoading(true);
-        // Split address into street and city (assuming format: "No.8, Cross Road, Galle")
-        const addressParts = address.split(',');
-        const city = addressParts.pop()?.trim() || '';
-        const street = addressParts.join(',').trim();
+        // Use street and city directly
 
         const response = await api.signup({
           fullName,
@@ -499,17 +504,58 @@ export default function LoginScreen() {
                   />
                 ))}
 
-                <Text style={styles.label}>{t('addressLabel')}</Text>
-                <View style={[styles.inputWrapper, errors.address && styles.inputError]}>
+                <Text style={styles.label}>{t('streetLabel') || 'Street Address'}</Text>
+                <View style={[styles.inputWrapper, errors.street && styles.inputError]}>
                   <TextInput
                     style={styles.input}
-                    value={address}
-                    onChangeText={(v) => { setAddress(v); clearErr('address'); }}
-                    placeholder={t('addressPlaceholder')}
+                    value={street}
+                    onChangeText={(v) => { setStreet(v); clearErr('street'); }}
+                    placeholder={t('streetPlaceholder') || 'No.8, Cross Road'}
                     placeholderTextColor="#9AA3AE"
                     returnKeyType="next"
                   />
                 </View>
+
+                <Text style={styles.label}>{t('cityLabel') || 'City'}</Text>
+                <TouchableOpacity
+                  onPress={() => setShowCityPicker(true)}
+                  style={[styles.inputWrapper, errors.city && styles.inputError]}
+                >
+                  <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={[styles.input, !city && { color: '#9CA3AF' }]}>
+                      {city || t('cityPlaceholder') || 'Select your city'}
+                    </Text>
+                    <Feather name="chevron-down" size={20} color="#6B7280" />
+                  </View>
+                </TouchableOpacity>
+
+                {showCityPicker && (
+                  <View style={[styles.inputWrapper, { marginTop: 4, maxHeight: 200 }]}>
+                    <ScrollView>
+                      {SRI_LANKA_CITIES.map((cityOption) => (
+                        <TouchableOpacity
+                          key={cityOption}
+                          style={[
+                            styles.cityOption,
+                            city === cityOption && { backgroundColor: '#F3F4F6' }
+                          ]}
+                          onPress={() => {
+                            setCity(cityOption);
+                            setShowCityPicker(false);
+                            clearErr('city');
+                          }}
+                        >
+                          <Text style={[
+                            styles.input,
+                            city === cityOption && { color: '#4A934A', fontWeight: '600' }
+                          ]}>
+                            {cityOption}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
 
                 <Text style={styles.label}>{t('contactLabel')}</Text>
                 <View style={[styles.inputWrapper, errors.contact && styles.inputError]}>
@@ -550,9 +596,7 @@ export default function LoginScreen() {
                 <Text style={styles.rememberText}>{t('rememberMe')}</Text>
               </Pressable>
 
-              <TouchableOpacity activeOpacity={0.8}>
-                <Text style={styles.helpLink}>{t('needHelp')}</Text>
-              </TouchableOpacity>
+              
             </View>
           </ScrollView>
 
@@ -756,6 +800,12 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   errorText: { color: '#DC2626', fontSize: 12, marginTop: 4, marginLeft: 4 },
+  
+  cityOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
 
   // Date picker styles
   datePickerContainer: {
