@@ -16,7 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_SPACING = 16;
-const API_URL = "https://tt25.tharusha.dev/api/user/appointments";
+const API_URL = "https://localhost//api/user/appointments";
 
 type Appointment = {
   appointmentId: string;

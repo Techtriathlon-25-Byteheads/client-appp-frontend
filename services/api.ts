@@ -1,4 +1,4 @@
-const BASE_URL = 'https://tt25.tharusha.dev/api';
+const BASE_URL = 'https://http://localhost/api';
 
 export interface LoginResponse {
   message: string;

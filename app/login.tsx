@@ -65,7 +65,7 @@ const TODAY = new Date();
 const I18N: Record<Lang, Record<string, string>> = {
   en: {
     getStartedTitle: "Ayubowan!",
-    getStartedSubtitle: "Welcome to Goverse National Services Portal",
+    getStartedSubtitle: "Welcome to GovQ National Services Portal",
     segmentLogin: "Log In",
     segmentSignup: "Sign Up",
     phoneLabel: "Mobile Number",
@@ -96,7 +96,7 @@ const I18N: Record<Lang, Record<string, string>> = {
   },
   si: {
     getStartedTitle: "ආයුබෝවන්!",
-    getStartedSubtitle: "ජාතික සෞඛ්‍ය මධ්‍යස්ථානය වෙත සාදරයෙන් පිළිගනිමු!",
+    getStartedSubtitle: "ජාතික මධ්‍යස්ථානය වෙත සාදරයෙන් පිළිගනිමු!",
     segmentLogin: "පිවිසෙන්න",
     segmentSignup: "ලියාපදිංචි වන්න",
     phoneLabel: "ජංගම අංකය",
