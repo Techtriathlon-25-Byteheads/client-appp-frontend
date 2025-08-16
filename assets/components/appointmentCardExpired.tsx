@@ -17,11 +17,11 @@ type Props = {
 const AppointmentCard: React.FC<Props> = ({ appointment }) => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "completed":
+      case "approved":
         return "#10b981";
       case "pending":
         return "#f59e0b";
-      case "rejected":
+      case "cancelled":
         return "#ef4444";
       default:
         return "#6b7280";

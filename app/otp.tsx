@@ -20,6 +20,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api, ApiError } from "@/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const heroImage = require("@/assets/images/otpBg.png");
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -186,8 +187,16 @@ export default function OTP() {
     try {
       setIsLoading(true);
       setError("");
-      await api.verifyOTP(userId, code);
+
+      const response = await api.verifyOTP(userId, code);
+
+      await AsyncStorage.setItem("userData", JSON.stringify(response));
+
+      if (response.token) {
+        await AsyncStorage.setItem("userToken", response.token);
+      }
       router.replace("/");
+      
     } catch (error) {
       if (error instanceof ApiError) setError(error.message);
       else setError("Failed to verify OTP. Please try again.");

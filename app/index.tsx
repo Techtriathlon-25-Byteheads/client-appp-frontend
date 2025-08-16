@@ -10,6 +10,7 @@ import {
   Platform,
   TextInput,
   Dimensions,
+  Pressable,
 } from "react-native";
 import {
   Ionicons,
@@ -39,6 +40,7 @@ import {
   Inter_900Black_Italic,
 } from "@expo-google-fonts/inter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 import AppointmentSlider from "@/assets/components/appointmentScroll";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -69,7 +71,7 @@ export default function HomeScreen() {
   });
   const [lang, setLang] = useState<"en" | "si" | "ta">("en");
   const [query, setQuery] = useState("");
-  const [greeting, setGreeting] = useState("");
+  const [greeting] = useState("");
   const [fontFamily, setFontFamily] = useState<string | undefined>(undefined);
 
   const translations = {
@@ -115,41 +117,6 @@ export default function HomeScreen() {
 
     loadLanguage();
 
-    const getTimeBasedGreeting = (lang: "en" | "si" | "ta") => {
-      const hour = new Date().getHours();
-      let greeting = "";
-
-      if (hour >= 5 && hour < 12) {
-        // Morning
-        greeting =
-          lang === "si"
-            ? "iqN WoEiklaæ" // Sinhala
-            : lang === "ta"
-            ? "காலை வணக்கம்!" // Tamil
-            : "Good Morning!"; // English
-      } else if (hour >= 12 && hour < 17) {
-        // Afternoon
-        greeting =
-          lang === "si"
-            ? "iqN oyj,​laæ"
-            : lang === "ta"
-            ? "நண்பகல் வணக்கம்!"
-            : "Good Afternoon!";
-      } else {
-        // Evening
-        greeting =
-          lang === "si"
-            ? "iqN iekaoEjlaæ"
-            : lang === "ta"
-            ? "மாலை வணக்கம்!"
-            : "Good Evening";
-      }
-      return greeting;
-    };
-
-    const greeting = getTimeBasedGreeting(lang);
-    setGreeting(greeting);
-
     const logAllStorage = async () => {
       try {
         const keys = await AsyncStorage.getAllKeys();
@@ -172,22 +139,45 @@ export default function HomeScreen() {
     else setFontFamily(undefined);
   }, [lang]);
 
+  const getTimeBasedGreeting = (lang: "en" | "si" | "ta") => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      return lang === "si"
+        ? "wdhqfndajka iqN WoEiklaæ"
+        : lang === "ta"
+        ? "காலை வணக்கம்!"
+        : "Ayubowan, Good Morning!";
+    } else if (hour >= 12 && hour < 17) {
+      return lang === "si"
+        ? "wdhqfndajka iqN oyj,​laæ"
+        : lang === "ta"
+        ? "நண்பகல் வணக்கம்!"
+        : "Ayubowan, Good Afternoon!";
+    } else {
+      return lang === "si"
+        ? "wdhqfndajka iqN iekaoEjlaæ"
+        : lang === "ta"
+        ? "மாலை வணக்கம்!"
+        : "Ayubowan, Good Evening!";
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Fixed green background */}
       <View style={styles.headerContent}>
         <View>
-          <Text style={[styles.greeting]}>{translations["en"].greeting}</Text>
-
-          <Text style={[styles.greetingSmall]}>
-            {translations["si"].greeting}
+          <Text style={[styles.greeting]}>{getTimeBasedGreeting("en")}</Text>
+          <Text style={[styles.greetingSmall, { fontFamily: "FMEmanee" }]}>
+            {getTimeBasedGreeting("si")}
           </Text>
-
-          <Text style={[styles.greetingSmall, { fontFamily: fontFamily }]}>
-            {translations["ta"].greeting}
+          <Text style={[styles.greetingSmall, { fontFamily }]}>
+            {getTimeBasedGreeting("ta")}
           </Text>
         </View>
-        <Ionicons name="person-circle-outline" size={50} color="#fff" />
+        <TouchableOpacity onPress={() => router.push("/profile")}>
+          <Ionicons name="person-circle-outline" size={50} color="#fff" />
+        </TouchableOpacity>
       </View>
       <View style={styles.subContent}>
         <Text style={[styles.subtitle, { fontFamily: fontFamily }]}>
@@ -241,7 +231,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </View>
-        <TouchableOpacity style={styles.seeAllButton}>
+        <TouchableOpacity style={styles.seeAllButton} onPress={() => router.push("/bookAppointment")}>
           <Text style={[styles.seeAllText, { fontFamily: fontFamily }]}>
             {translations[lang].seeAllServices}
           </Text>
@@ -253,16 +243,18 @@ export default function HomeScreen() {
         </Text>
         <AppointmentSlider />
 
-        {/* Health Check */}
-        <Image
-          source={ChatbotBanner}
-          style={{
-            width: SCREEN_WIDTH - 32,
-            alignSelf: "center",
-            resizeMode: "contain",
-            borderRadius: 12,
-          }}
-        />
+        {/* AI Bot */}
+        <Pressable onPress={() => router.push("/aiChat")}>
+          <Image
+            source={ChatbotBanner}
+            style={{
+              width: SCREEN_WIDTH - 32,
+              alignSelf: "center",
+              resizeMode: "contain",
+              borderRadius: 12,
+            }}
+          />
+        </Pressable>
       </ScrollView>
 
       {/* Floating Icon */}
@@ -423,5 +415,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 12,
     elevation: 3,
+    zIndex: 10,
   },
 });

@@ -1,28 +1,106 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import AppointmentCard from './appointmentCard';
+import React, { useRef, useState, useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  TouchableOpacity,
+  Pressable,
+  Text,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import AppointmentCard from "./appointmentCard";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_SPACING = 16; // space between cards
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_SPACING = 16;
+const API_URL = "https://tt25.tharusha.dev/api/user/appointments";
 
-const appointments = [
-  { id: '1', title: "General Appointment", location: "OPD @ Colombo National Hospital", date: "Wed, 10 Jan, 2024", time: "Morning set: 11:00", status: "Approved" },
-  { id: '2', title: "Cardiology Consultation", location: "Cardiology Ward @ Colombo National Hospital", date: "Fri, 12 Jan, 2024", time: "Afternoon set: 14:30", status: "Pending" },
-  { id: '3', title: "Follow-up Appointment", location: "OPD @ Colombo National Hospital", date: "Mon, 15 Jan, 2024", time: "Morning set: 09:00", status: "Approved" }
-];
+type Appointment = {
+  appointmentId: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: string;
+  notes?: string;
+  [key: string]: any;
+};
 
 const AppointmentSlider = () => {
   const flatListRef = useRef<FlatList>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAppointments = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      if (!token) {
+        console.warn("No auth token found");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, 
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch appointments");
+      }
+
+      const data = await response.json();
+
+      // Filter ongoing appointments by date/time
+      const now = new Date();
+      const ongoing = data
+        .map((a: Appointment) => ({
+          ...a,
+          status:
+            a.status === "scheduled"
+              ? "Pending"
+              : a.status === "completed"
+              ? "Completed"
+              : "Rejected",
+        }))
+        .filter((a: Appointment) => {
+          const appointmentDate = new Date(
+            a.appointmentDate + "T" + a.appointmentTime.slice(11)
+          );
+          return appointmentDate >= now; // future or ongoing
+        });
+
+      setAppointments(ongoing);
+    } catch (err) {
+      console.error("Error fetching appointments:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
 
   const scrollToIndex = (index: number) => {
     flatListRef.current?.scrollToIndex({ index, animated: true });
     setCurrentIndex(index);
   };
 
-  const nextSlide = () => scrollToIndex(currentIndex === appointments.length - 1 ? 0 : currentIndex + 1);
-  const prevSlide = () => scrollToIndex(currentIndex === 0 ? appointments.length - 1 : currentIndex - 1);
+  const nextSlide = () =>
+    scrollToIndex(
+      currentIndex === appointments.length - 1 ? 0 : currentIndex + 1
+    );
+  const prevSlide = () =>
+    scrollToIndex(
+      currentIndex === 0 ? appointments.length - 1 : currentIndex - 1
+    );
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) setCurrentIndex(viewableItems[0].index);
@@ -30,12 +108,28 @@ const AppointmentSlider = () => {
 
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
+  if (loading) {
+    return (
+      <View style={{ padding: 16, alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#14b8a6" />
+      </View>
+    );
+  }
+
+  if (appointments.length === 0) {
+    return (
+      <View style={{ padding: 16, alignItems: "center" }}>
+        <Text style={{ color: "#6b7280" }}>No upcoming appointments</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={appointments}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.appointmentId}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -45,7 +139,9 @@ const AppointmentSlider = () => {
         ItemSeparatorComponent={() => <View style={{ width: CARD_SPACING }} />}
         renderItem={({ item }) => (
           <View style={[styles.card, { width: SCREEN_WIDTH - CARD_SPACING }]}>
-            <AppointmentCard appointment={item} />
+            <Pressable onPress={() => router.push("/appointments")}>
+              <AppointmentCard appointment={item} />
+            </Pressable>
           </View>
         )}
         onViewableItemsChanged={onViewableItemsChanged}
@@ -60,7 +156,10 @@ const AppointmentSlider = () => {
 
         <View style={styles.dotsContainer}>
           {appointments.map((_, idx) => (
-            <View key={idx} style={[styles.dot, idx === currentIndex && styles.activeDot]} />
+            <View
+              key={idx}
+              style={[styles.dot, idx === currentIndex && styles.activeDot]}
+            />
           ))}
         </View>
 
@@ -75,12 +174,21 @@ const AppointmentSlider = () => {
 export default AppointmentSlider;
 
 const styles = StyleSheet.create({
-  container: { paddingBlock: 16 },
-  card: { borderRadius: 16},
-  navigation: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center'},
+  container: { paddingVertical: 16 },
+  card: { borderRadius: 16 },
+  navigation: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   navButton: { padding: 8 },
-  dotsContainer: { flexDirection: 'row', marginHorizontal: 16 },
-  dot: { width: 8, height: 8, borderRadius: 6, backgroundColor: '#d1d5db', marginHorizontal: 4 },
-  activeDot: { backgroundColor: '#14b8a6' },
-  instructions: { textAlign: 'center', marginTop: 16, color: '#6b7280' }
+  dotsContainer: { flexDirection: "row", marginHorizontal: 16 },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 6,
+    backgroundColor: "#d1d5db",
+    marginHorizontal: 4,
+  },
+  activeDot: { backgroundColor: "#14b8a6" },
 });
