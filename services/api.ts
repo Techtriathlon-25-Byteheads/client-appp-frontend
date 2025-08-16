@@ -1,4 +1,4 @@
-const BASE_URL = 'https://seminar-zoo-online-patrick.trycloudflare.com/api';
+const BASE_URL = 'https://tt25.tharusha.dev/api';
 
 export interface LoginResponse {
   message: string;
@@ -31,6 +31,43 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+export interface Service {
+  id: string;
+  name: string;
+  description: string;
+  departmentId: string | null;
+  operationalHours?: OperationalHours;
+  requiredDocuments?: RequiredDocuments;
+}
+
+export interface OperationalHours {
+  [day: string]: string[];
+}
+
+export interface RequiredDocuments {
+  other: string[];
+  usual: {
+    [document: string]: boolean;
+  };
+}
+
+export interface Slot {
+  time: string;
+  currentQueueSize: number;
+  maxCapacity: number;
+  isAvailable: boolean;
+}
+
+export interface Department {
+  id: string;
+  departmentName: string;
+  city: string;
+  services: {
+    serviceId: string;
+    serviceName: string;
+  }[];
 }
 
 export const api = {
@@ -97,6 +134,38 @@ export const api = {
       throw new ApiError(response.status, 'OTP verification failed');
     }
 
+    return response.json();
+  },
+
+  getServices: async (): Promise<Service[]> => {
+    const response = await fetch(`${BASE_URL}/services`);
+    if (!response.ok) {
+      throw new ApiError(response.status, 'Failed to fetch services');
+    }
+    return response.json();
+  },
+
+  getDepartments: async (): Promise<Department[]> => {
+    const response = await fetch(`${BASE_URL}/departments`);
+    if (!response.ok) {
+      throw new ApiError(response.status, 'Failed to fetch departments');
+    }
+    return response.json();
+  },
+
+  getServiceById: async (id: string): Promise<Service> => {
+    const response = await fetch(`${BASE_URL}/services/${id}`);
+    if (!response.ok) {
+      throw new ApiError(response.status, 'Failed to fetch service details');
+    }
+    return response.json();
+  },
+
+  getSlotsForService: async (serviceId: string, date: string): Promise<Slot[]> => {
+    const response = await fetch(`${BASE_URL}/appointments/${serviceId}/slots?date=${date}`);
+    if (!response.ok) {
+      throw new ApiError(response.status, 'Failed to fetch slots');
+    }
     return response.json();
   },
 };
