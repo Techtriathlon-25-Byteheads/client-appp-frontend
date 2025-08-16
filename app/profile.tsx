@@ -85,6 +85,25 @@ export default function ProfileSection() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const t = translations[selectedLang];
 
+  // Logout handler: clear token and navigate to login
+  const handleLogout = async () => {
+    try {
+      // Remove token from local storage (AsyncStorage)
+      if (typeof window === 'undefined') {
+        // React Native AsyncStorage
+        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+        await AsyncStorage.removeItem('token');
+      } else {
+        // Web localStorage fallback
+        window.localStorage.removeItem('token');
+      }
+    } catch (e) {
+      // Optionally show error
+    }
+    setShowLogoutModal(false);
+    router.replace('/login');
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -205,7 +224,7 @@ export default function ProfileSection() {
               </Pressable>
               <Pressable
                 style={styles.modalLogout}
-                onPress={() => setShowLogoutModal(false)}
+                onPress={handleLogout}
               >
                 <Text style={styles.modalLogoutText}>{t.logout}</Text>
               </Pressable>
