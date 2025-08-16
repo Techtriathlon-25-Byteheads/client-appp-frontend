@@ -23,7 +23,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { api } from '../services/api';
+import { api } from '@/services/api';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H_LOGIN = SCREEN_H * 0.75;   // 3/4 for Log In
@@ -31,7 +31,7 @@ const SHEET_H_SIGNUP = SCREEN_H * 0.80;  // Sign Up a bit taller
 const SHEET_H_EXPANDED = SCREEN_H * 0.94;
 
 type Mode = 'login' | 'signup';
-type Lang = 'si' | 'ta' | 'en';
+type Lang = 'si' |'en'| 'ta' ;
 
 const MIN_DOB = new Date(1850, 0, 1);
 const TODAY = new Date();

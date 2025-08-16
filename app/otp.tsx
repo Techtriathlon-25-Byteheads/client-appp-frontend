@@ -178,7 +178,7 @@ export default function OTP() {
             {digits.map((d, i) => (
               <TextInput
                 key={i}
-                ref={el => (inputs.current[i] = el)}
+                ref={el => { inputs.current[i] = el; }}
                 value={d}
                 onChangeText={val => handleChange(i, val)}
                 onKeyPress={e => handleKey(i, e)}

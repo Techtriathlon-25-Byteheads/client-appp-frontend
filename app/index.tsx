@@ -1,311 +1,312 @@
-import { Feather, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Link, } from 'expo-router'; // <-- Import Link and useRouter
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Platform,
+  TextInput,
+  Dimensions,
+} from "react-native";
+import {
+  Ionicons,
+  MaterialIcons,
+  FontAwesome5,
+  Feather,
+} from "@expo/vector-icons";
+import { useFonts } from "expo-font";
+import {
+  Inter_100Thin,
+  Inter_200ExtraLight,
+  Inter_300Light,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+  Inter_900Black,
+  Inter_100Thin_Italic,
+  Inter_200ExtraLight_Italic,
+  Inter_300Light_Italic,
+  Inter_400Regular_Italic,
+  Inter_500Medium_Italic,
+  Inter_600SemiBold_Italic,
+  Inter_700Bold_Italic,
+  Inter_800ExtraBold_Italic,
+  Inter_900Black_Italic,
+} from "@expo-google-fonts/inter";
 
-// A placeholder for the doctor illustration
-const doctorIllustration = require('../assets/images/doctor-illustration.png');
+import AppointmentSlider from "@/assets/components/appointmentScroll";
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-export default function App() {
+const ChatbotBanner = require("@/assets/images/chatbotBanner.png");
+
+export default function HomeScreen() {
+  const [fontsLoaded] = useFonts({
+    Inter_100Thin,
+    Inter_200ExtraLight,
+    Inter_300Light,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+    Inter_900Black,
+    Inter_100Thin_Italic,
+    Inter_200ExtraLight_Italic,
+    Inter_300Light_Italic,
+    Inter_400Regular_Italic,
+    Inter_500Medium_Italic,
+    Inter_600SemiBold_Italic,
+    Inter_700Bold_Italic,
+    Inter_800ExtraBold_Italic,
+    Inter_900Black_Italic,
+    FMEmanee: require("@/assets/fonts/FMEmanee.ttf"),
+  });
+
+  const [query, setQuery] = useState("");
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" backgroundColor="#4A934A" />
-
-      {/* --- Fixed Green Background --- */}
-      <View style={styles.greenBackground}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Ayubowan, yasiru!</Text>
-            <Text style={styles.greetingSub}>ආයුබෝවන්, යසිරු!</Text>
-            <Text style={styles.greetingSub}>வணக்கம், யசிரு!</Text>
-            <Text style={styles.welcomeText}>Welcome to National Health Hub of Sri Lanka.</Text>
-          </View>
-          <Link href="/login" asChild>
-          <TouchableOpacity style={styles.profileIconContainer}>
-            <Feather name="user" size={28} color="#4A934A" />
-          </TouchableOpacity>
-        </Link>
-        </View>
-      </View>
-
-      <ScrollView
-        style={styles.whiteSheet}
-        contentContainerStyle={styles.whiteSheetContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.mainTitle}>What Medi-Help do you need Today?</Text>
-
-        {/* --- Action Cards --- */}
-        <View style={styles.cardRow}>
-          {/* --- Updated this card --- */}
-          <Link href="/book-appointment" asChild>
-            <TouchableOpacity style={styles.card}>
-              <FontAwesome name="calendar-plus-o" size={24} color="#4A934A" />
-              <Text style={styles.cardTitle}>Book an Apppointment</Text>
-              <Text style={styles.cardSubtitle}>Book a Doctor or scan</Text>
-            </TouchableOpacity>
-          </Link>
-          <TouchableOpacity style={styles.card}>
-            <FontAwesome name="file-text-o" size={24} color="#4A934A" />
-            <Text style={styles.cardTitle}>My Reports</Text>
-            <Text style={styles.cardSubtitle}>Your Previous Medical Documents</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* --- General Appointment Card --- */}
-  <Link href="/appointments" asChild>
-  <TouchableOpacity style={styles.appointmentCard} activeOpacity={0.8}>
-    <View style={styles.appointmentHeader}>
-      <View style={styles.appointmentInfo}>
-        <View style={styles.calendarIconBg}>
-          <FontAwesome name="calendar" size={18} color="#5D9C9C" />
-        </View>
+      {/* Fixed green background */}
+      <View style={styles.headerContent}>
         <View>
-          <Text style={styles.appointmentTitle}>General Appointment</Text>
-          <Text style={styles.appointmentSubtitle}>OPD @ Colombo National Hospital</Text>
+          <Text style={styles.greeting}>Ayubowan, Yasiru!</Text>
+          <Text style={styles.greetingSmall}>whqfndajka" hisreæ</Text>
+          <Text style={styles.greetingSmall}>வணக்கம்" யசிருæ</Text>
         </View>
+        <Ionicons name="person-circle-outline" size={50} color="#fff" />
+      </View>
+      <View style={styles.subContent}>
+        <Text style={styles.subtitle}>
+          Welcome to Goverse Government Services Portal
+        </Text>
       </View>
 
-      {/* (Optional) keep this as a separate button or remove it since the whole card is pressable */}
-      <TouchableOpacity>
-        <MaterialCommunityIcons name="arrow-top-right" size={24} color="white" />
-      </TouchableOpacity>
-    </View>
+      {/* White scrollable content */}
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 20 }}
+        style={styles.scrollArea}
+      >
+        <View style={styles.searchContainer}>
+          <Feather name="search" size={20} color="#666" style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder={'Search for a Service, Try "Driver\'s License"'}
+            value={query}
+            onChangeText={setQuery}
+            placeholderTextColor="#999"
+          />
 
-    <View style={styles.appointmentDetails}>
-      <View style={styles.detailItem}>
-        <FontAwesome name="calendar" size={14} color="white" />
-        <Text style={styles.detailText}>Wed, 10 Jan, 2024</Text>
-      </View>
-      <View style={styles.detailItem}>
-        <FontAwesome name="clock-o" size={14} color="white" />
-        <Text style={styles.detailText}>Mornig set: 11:00</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-</Link>
-
-
-        {/* --- Health Status Card --- */}
-        <View style={styles.healthStatusCard}>
-          <View style={styles.healthStatusTextContainer}>
-            <Text style={styles.healthStatusTitle}>Check Your Health Status</Text>
-            <TouchableOpacity style={styles.tryNowButton}>
-              <Text style={styles.tryNowButtonText}>Try Navariyan AI Now</Text>
+          <TouchableOpacity>
+            <MaterialIcons
+              name="mic"
+              size={24}
+              color="#666"
+              style={styles.mic}
+            />
+          </TouchableOpacity>
+        </View>
+        {/* Popular Services */}
+        <Text style={styles.sectionTitle}>Popular Services</Text>
+        <View style={styles.serviceGrid}>
+          {[
+            "National Identity Card Services",
+            "Driving License Renewals",
+            "Tax Declaration Submissions",
+            "Passport Renewals",
+          ].map((service, index) => (
+            <TouchableOpacity key={index} style={styles.serviceCard}>
+              <MaterialIcons
+                name="post-add"
+                size={24}
+                color="#1f6b5c"
+                style={{ marginBottom: 5 }}
+              />
+              <Text style={styles.serviceText}>{service}</Text>
             </TouchableOpacity>
-          </View>
-          <Image source={doctorIllustration} style={styles.doctorImage} />
+          ))}
         </View>
+        <TouchableOpacity style={styles.seeAllButton}>
+          <Text style={styles.seeAllText}>See All Services →</Text>
+        </TouchableOpacity>
 
-        {/* --- Heatstroke Alert --- */}
-        <View style={styles.alertContainer}>
-            <FontAwesome name="warning" size={18} color="#FFA000" />
-            <View style={styles.alertTextContainer}>
-              <Text style={styles.alertTitle}>Heatstroke Alert</Text>
-              <Text style={styles.alertMessage}>
-                Prolonged exposure to high temperatures can cause dehydration, dizziness, and unconsciousness. Stay hydrated...
-              </Text>
-            </View>
-        </View>
+        {/* Ongoing Appointments */}
+        <Text style={styles.sectionTitle}>Ongoing Appointments</Text>
+        <AppointmentSlider />
 
+        {/* Health Check */}
+        <Image
+          source={ChatbotBanner}
+          style={{
+            width: SCREEN_WIDTH - 32,
+            alignSelf: "center",
+            resizeMode: "contain",
+            borderRadius: 12,
+          }}
+        />
       </ScrollView>
+
+      {/* Floating Icon */}
+      <TouchableOpacity style={styles.floatingIcon}>
+        <FontAwesome5 name="user-md" size={24} color="#fff" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#4A934A',
+  container: { backgroundColor: "#1f6b5c", paddingHorizontal: 20 },
+
+  headerContent: {
+    padding: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginTop: 20,
   },
-  greenBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 250, // Adjust height as needed
-    backgroundColor: '#4A934A',
-    paddingTop: 40, // Adjust for status bar height if not using SafeAreaView
+
+  subContent: {
+    marginTop: -15,
     paddingHorizontal: 20,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginTop: 30,
-  },
   greeting: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    width: "100%",
+    fontFamily: "Inter_500Medium",
+    color: "#fff",
+    fontSize: 25,
+    fontWeight: "500",
   },
-  greetingSub: {
-    fontSize: 16,
-    color: '#FFFFFF',
+  greetingSmall: {
+    fontFamily: "FMEmanee",
+    color: "#fff",
+    fontSize: 20,
+    lineHeight: 25,
   },
-  welcomeText: {
+  subtitle: {
+    color: "#d9f0eb",
     fontSize: 14,
-    color: '#E0E0E0',
     marginTop: 8,
   },
-  
-  profileIconContainer: {
-    backgroundColor: '#FFFFFF',
-    padding: 12,
-    borderRadius: 50,
-    width: 52,
-    height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
+
+  scrollArea: {
+    marginTop: 20, // push content below header
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    zIndex: 2,
   },
-  whiteSheet: {
-    flex: 1,
-    marginTop: 220, // Position it below the header part of the green BG
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-  },
-  whiteSheetContent: {
-    padding: 20,
-    paddingBottom: 40, // Extra padding at the bottom
-  },
-  mainTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 20,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: '#F7F7F7',
-    borderRadius: 15,
-    padding: 15,
-    width: '48%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ebebebff",
+    borderRadius: 30,
+    paddingHorizontal: 15,
+    paddingVertical: Platform.OS === "ios" ? 12 : 8,
+    margin: 16,
+    marginTop: 20,
+    shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+    elevation: 2, // for Android shadow
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10,
-    color: '#333333',
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    color: '#666666',
-    marginTop: 4,
-  },
-  appointmentCard: {
-    backgroundColor: '#5D9C9C',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 20,
-  },
-  appointmentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  appointmentInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  calendarIconBg: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    padding: 8,
-    borderRadius: 10,
+  icon: {
     marginRight: 10,
   },
-  appointmentTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  appointmentSubtitle: {
-    fontSize: 14,
-    color: '#E0E0E0',
-  },
-  appointmentDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
-    paddingTop: 15,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  detailText: {
-    color: '#FFFFFF',
-    marginLeft: 8,
-    fontSize: 12,
-  },
-  healthStatusCard: {
-    backgroundColor: '#E8F5E9',
-    borderRadius: 15,
-    padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    overflow: 'hidden', // to contain the image properly
-  },
-  healthStatusTextContainer: {
+  input: {
     flex: 1,
-  },
-  healthStatusTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#388E3C',
+    color: "#333",
   },
-  tryNowButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    marginTop: 10,
-    alignSelf: 'flex-start', // Don't stretch button
-  },
-  tryNowButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  doctorImage: {
-    width: 100,
-    height: 120,
-    position: 'absolute',
-    right: 0,
-    bottom: -15, // Positioned slightly outside the card
-  },
-  alertContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#FFF8E1',
-    padding: 15,
-    borderRadius: 10,
-  },
-  alertTextContainer: {
+  mic: {
     marginLeft: 10,
-    flex: 1,
   },
-  alertTitle: {
-    fontWeight: 'bold',
-    color: '#FFA000',
+
+  sectionTitle: {
+    fontSize: 24,
+    fontFamily: "Inter_500Medium",
+    marginHorizontal: 16,
+    marginTop: 16,
+    color: "#1f6b5c",
   },
-  alertMessage: {
-    color: '#666',
-    marginTop: 4,
-    fontSize: 12,
-    lineHeight: 18,
+  serviceGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  serviceCard: {
+    backgroundColor: "#e8f4f1",
+    width: "48%",
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  serviceText: {
+    fontFamily: "Inter_500Medium",
+    textAlign: "center",
+    color: "#000000ff",
+    fontSize: 15,
+  },
+  seeAllButton: {
+    backgroundColor: "#1f6b5c",
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 12,
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  seeAllText: {
+    fontFamily: "Inter_500Medium",
+    color: "#fff",
+    fontSize: 15,
+  },
+  appointmentCard: {
+    backgroundColor: "#1f6b5c",
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 12,
+    padding: 16,
+  },
+  appointmentTitle: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  appointmentSub: { color: "#d9f0eb", fontSize: 13, marginBottom: 8 },
+  appointmentDetails: { marginTop: 10 },
+  detailItem: { flexDirection: "row", alignItems: "center", marginTop: 4 },
+  detailText: { color: "#fff", fontSize: 12, marginLeft: 6 },
+  healthCard: {
+    backgroundColor: "#e0f5f2",
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  healthTitle: { fontSize: 16, fontWeight: "bold", color: "#1f6b5c" },
+  healthButton: {
+    backgroundColor: "#1f6b5c",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  healthButtonText: { color: "#fff", fontSize: 12 },
+  floatingIcon: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#1f6b5c",
+    borderRadius: 30,
+    padding: 12,
+    elevation: 3,
   },
 });
